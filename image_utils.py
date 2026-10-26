@@ -8,7 +8,10 @@ import base64
 import io
 from typing import Tuple, Optional
 import numpy as np
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 try:
     import cv2
@@ -90,8 +93,12 @@ def ndarray_to_base64(img_bgr: np.ndarray, format: str = "JPEG") -> str:
             return base64.b64encode(encoded).decode("utf-8")
 
     # Fallback via PIL
-    rgb = img_bgr[:, :, ::-1] if len(img_bgr.shape) == 3 else img_bgr
-    pil_img = Image.fromarray(rgb)
-    buf = io.BytesIO()
-    pil_img.save(buf, format=format)
-    return base64.b64encode(buf.getvalue()).decode("utf-8")
+    if Image is not None:
+        rgb = img_bgr[:, :, ::-1] if len(img_bgr.shape) == 3 else img_bgr
+        pil_img = Image.fromarray(rgb)
+        buf = io.BytesIO()
+        pil_img.save(buf, format=format)
+        return base64.b64encode(buf.getvalue()).decode("utf-8")
+
+    # Pure raw bytes fallback
+    return base64.b64encode(img_bgr.tobytes()).decode("utf-8")
