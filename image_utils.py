@@ -44,7 +44,8 @@ def compute_sharpness_score(img_bgr: np.ndarray) -> float:
         return 120.0
 
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    score = cv2.Laplacian(gray, cv2.CV_64F).var()
+    small_gray = cv2.resize(gray, (0, 0), fx=0.5, fy=0.5)
+    score = cv2.Laplacian(small_gray, cv2.CV_64F).var()
     return float(round(score, 1))
 
 
